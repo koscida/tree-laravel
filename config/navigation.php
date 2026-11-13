@@ -10,8 +10,8 @@
 |
 |   ['label' => 'Files', 'route' => 'files.index'],
 |
-| Keep this array empty until a page exists to link to.
-|
 */
 
-return [];
+return [
+    ['label' => 'Files', 'route' => 'files.index'],
+];
