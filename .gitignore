@@ -29,5 +29,17 @@ Thumbs.db
 # Local AI workflow files (not versioned)
 PLAN.md
 plan.md
+SETUP.md
+setup.md
 AGENTS.md
 agents.md
+CLAUDE.md
+claude.md
+
+# Tests are local only: fixtures may contain real family data
+/tests
+phpunit.xml
+
+# Docker compose holds the local dev database credentials
+docker-compose.yml
+docker-compose.override.yml
