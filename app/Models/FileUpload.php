@@ -12,5 +12,6 @@ class FileUpload extends Model
     protected $fillable = [
         'filename',
         'filepath',
+        'record_type',
     ];
 }

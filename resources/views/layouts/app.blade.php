@@ -36,6 +36,15 @@
         </nav>
 
         <main class="flex-grow-1">
+            @if (session('status'))
+                <div class="container pt-4">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ session('status') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            @endif
+
             @yield('content')
         </main>
 
