@@ -22,10 +22,11 @@
                 <div class="collapse navbar-collapse" id="mainNav">
                     <ul class="navbar-nav ms-auto">
                         @foreach (config('navigation', []) as $link)
+                            @php($active = request()->routeIs($link['active'] ?? $link['route']))
                             <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs($link['route']) ? 'active' : '' }}"
+                                <a class="nav-link {{ $active ? 'active' : '' }}"
                                    href="{{ route($link['route']) }}"
-                                   @if (request()->routeIs($link['route'])) aria-current="page" @endif>
+                                   @if ($active) aria-current="page" @endif>
                                     {{ $link['label'] }}
                                 </a>
                             </li>
@@ -36,14 +37,16 @@
         </nav>
 
         <main class="flex-grow-1">
-            @if (session('status'))
-                <div class="container pt-4">
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        {{ session('status') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            @foreach (['status' => 'success', 'error' => 'danger'] as $key => $style)
+                @if (session($key))
+                    <div class="container pt-4">
+                        <div class="alert alert-{{ $style }} alert-dismissible fade show" role="alert">
+                            {{ session($key) }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
                     </div>
-                </div>
-            @endif
+                @endif
+            @endforeach
 
             @yield('content')
         </main>

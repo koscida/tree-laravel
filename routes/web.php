@@ -8,3 +8,4 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/files', [FileUploadController::class, 'index'])->name('files.index');
 Route::post('/files', [FileUploadController::class, 'store'])->name('files.store');
+Route::get('/files/{fileUploadId}', [FileUploadController::class, 'show'])->name('files.show');

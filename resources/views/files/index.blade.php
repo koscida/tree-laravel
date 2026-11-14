@@ -41,7 +41,7 @@
                         </div>
 
                         <div class="col-md-2">
-							<label class="form-label">&nbsp;</label>
+								<label class="form-label">&nbsp;</label>
                             <button type="submit" class="btn btn-primary w-100">Upload</button>
                         </div>
                     </div>
@@ -63,6 +63,7 @@
                             <th scope="col">Path</th>
                             <th scope="col">Created</th>
                             <th scope="col">Updated</th>
+                            <th scope="col"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -73,6 +74,11 @@
                                 <td><code>{{ $file->filepath }}</code></td>
                                 <td>{{ $file->created_at?->format('d M Y') }}</td>
                                 <td>{{ $file->updated_at?->format('d M Y') }}</td>
+                                <td class="text-end">
+                                    <a class="btn btn-sm btn-outline-secondary"
+                                       href="{{ route('files.show', $file) }}"
+                                       aria-label="Open {{ $file->filename }}">Open</a>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
