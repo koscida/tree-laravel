@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\FileUpload;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -55,7 +56,43 @@ class FileUploadController extends Controller
             );
         }
 
-        return view('files.show', ['file' => $file]);
+        $fileRows = $file->fileRows()->orderBy('row_number')->get();
+        $logs = $file->fileRowLogs()->orderBy('created_at')->orderBy('id')->get();
+
+        return view('files.show', [
+            'file' => $file,
+            'fileRows' => $fileRows,
+            'parseAttemptCount' => $logs->pluck('uuid')->unique()->count(),
+            'lastAttempt' => $logs->last(),
+            'totalCsvRows' => $this->countCsvRows($file->filepath),
+        ]);
+    }
+
+    private function countCsvRows(string $filepath): ?int
+    {
+        $disk = Storage::disk('local');
+
+        if (! $disk->exists($filepath)) {
+            return null;
+        }
+
+        $handle = fopen($disk->path($filepath), 'rb');
+
+        if ($handle === false) {
+            return null;
+        }
+
+        $count = 0;
+
+        try {
+            while (fgetcsv($handle, 0, ',', '"', '') !== false) {
+                $count++;
+            }
+        } finally {
+            fclose($handle);
+        }
+
+        return $count;
     }
 
     private function fileError(string $message): RedirectResponse
