@@ -39,12 +39,9 @@
         <section class="mb-4">
             <h2 class="h4">File Rows</h2>
 
-            <p class="mb-3">
-                <span class="me-3">CSV parsed: <strong>{{ $file->is_parsed ? 'Yes' : 'No' }}</strong></span>
-                <span class="me-3">Header rows: <strong>{{ $file->header_rows }}</strong></span>
-                <span class="me-3">Total rows: <strong>{{ $totalCsvRows === null ? 'Unknown' : $totalCsvRows }}</strong></span>
-                <span>Parse attempts: <strong>{{ $parseAttemptCount }}</strong></span>
-            </p>
+            <p class="mb-3">CSV parsed: <strong>{{ $file->is_parsed ? 'Yes' : 'No' }}</strong></p>
+
+            <p class="mb-3">Parse attempts: <strong>{{ $parseAttemptCount }}</strong></p>
 
             @if ($lastAttempt !== null)
                 <p class="mb-3">
@@ -56,11 +53,27 @@
                 <div class="alert alert-danger py-2 mb-3" role="alert">{{ $lastAttempt->message }}</div>
             @endif
 
-            @if ($fileRows->isEmpty())
+            @if ($file->is_parsed)
+                <p class="mb-1">Stored Header Row Count: <strong>{{ $file->header_rows }}</strong></p>
+
+                <p class="mb-1 mt-3">CSV Data:</p>
+                <ul class="mb-0">
+                    <li>Rows in file: <strong>{{ $totalCsvRows }}</strong></li>
+                </ul>
+
+                <p class="mb-1 mt-3">Parsed data:</p>
+                <ul class="mb-3">
+                    <li>Marked Header Rows: <strong>{{ $fileRowHeaderCount }}</strong></li>
+                    <li>(Computed) Data Rows: <strong>{{ $totalFileRows - $fileRowHeaderCount }}</strong></li>
+                    <li>Stored Rows: <strong>{{ $totalFileRows }}</strong></li>
+                </ul>
+            @endif
+
+            @if ($totalFileRows === 0)
                 <p class="text-secondary fst-italic">This CSV has not been parsed yet.</p>
             @endif
 
-            <a class="btn btn-primary" href="{{ route('file_rows.index', $file) }}">Open File Rows</a>
+            <a class="btn {{ $file->is_parsed ? 'btn-outline-primary' : 'btn-primary' }} btn-sm" href="{{ route('file_rows.index', $file) }}">Open File Rows</a>
         </section>
 
         <section class="mb-4">

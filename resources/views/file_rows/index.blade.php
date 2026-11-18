@@ -16,7 +16,7 @@
             </ol>
         </nav>
 
-        <h1 class="h3 mb-4">File Rows for {{ $file->filename }}</h1>
+        <h1 class="h3 mb-4">CSV Preview for {{ $file->filename }}</h1>
 
         @php
             $columnCount = collect($rows)->max(fn ($row) => count($row['cells'])) ?? 0;
@@ -25,7 +25,7 @@
         <form id="file-rows-form" method="POST" action="{{ route('file_rows.store', $file) }}">
             @csrf
 
-            <p class="text-secondary">{{ count($rows) }}/{{ $totalRows }} lines shown</p>
+            <p class="text-secondary">{{ count($rows) }}/{{ $totalCsvRows }} lines shown</p>
 
             @if ($rows === [])
                 <div class="alert alert-info mb-0" role="alert">
@@ -50,7 +50,8 @@
                                             <input class="form-check-input header-row-checkbox" type="checkbox"
                                                    name="header_rows[]"
                                                    id="header-row-{{ $row['row_number'] }}"
-                                                   value="{{ $row['row_number'] }}">
+                                                   value="{{ $row['row_number'] }}"
+                                                   @disabled($file->is_parsed)>
                                             <label class="form-check-label" for="header-row-{{ $row['row_number'] }}">
                                                 Row {{ $row['row_number'] }}
                                             </label>
@@ -67,7 +68,7 @@
             @endif
 
             <div class="d-flex align-items-center gap-3 mt-3">
-                <button type="submit" class="btn btn-primary">Save header rows</button>
+                <button type="submit" class="btn btn-primary" @disabled($file->is_parsed)>Submit</button>
                 <span id="header-rows-error" class="text-danger small" hidden>
                     Select at least one header row before saving.
                 </span>
@@ -76,6 +77,61 @@
                 @enderror
             </div>
         </form>
+
+        <div class="mt-5">
+            <h2 class="h4">File Rows</h2>
+
+            @if (! $file->is_parsed)
+                <p class="text-secondary fst-italic">This CSV has not been parsed yet.</p>
+            @else
+                <p class="mb-1">Stored Header Row Count: <strong>{{ $file->header_rows }}</strong></p>
+
+                <p class="mb-1 mt-3">CSV Data:</p>
+                <ul class="mb-0">
+                    <li>Rows in file: <strong>{{ $totalCsvRows }}</strong></li>
+                </ul>
+
+                <p class="mb-1 mt-3">Parsed data:</p>
+                <ul class="mb-3">
+                    <li>Marked Header Rows: <strong>{{ $fileRowHeaderCount }}</strong></li>
+                    <li>(Computed) Data Rows: <strong>{{ $totalFileRows - $fileRowHeaderCount }}</strong></li>
+                    <li>Stored Rows: <strong>{{ $totalFileRows }}</strong></li>
+                </ul>
+
+                <div class="table-responsive border rounded">
+                    <table class="table table-sm table-striped align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">Row</th>
+                                <th scope="col">Is Header</th>
+                                <th scope="col">Data</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($fileRows as $fileRow)
+                                <tr>
+                                    <td>{{ $fileRow->row_number }}</td>
+                                    <td>{{ $fileRow->is_header ? 'Yes' : 'No' }}</td>
+                                    <td class="text-break">
+                                        <pre class="mb-0 text-break" style="white-space: pre-wrap;">{{ json_encode($fileRow->data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="text-secondary fst-italic">No stored rows.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                @if ($fileRows->hasPages())
+                    <div class="mt-3">
+                        {{ $fileRows->links() }}
+                    </div>
+                @endif
+            @endif
+        </div>
 
         <h2 class="h4 mt-5">Parse Attempts</h2>
 

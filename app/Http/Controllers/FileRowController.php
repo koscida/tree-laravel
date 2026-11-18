@@ -24,22 +24,34 @@ class FileRowController extends Controller
             return $file;
         }
 
+        $head = $this->readCsvHead($file->filepath, 50);
+
+        if ($head === null) {
+            return redirect()
+                ->route('files.index')
+                ->with('error', 'The CSV file could not be found.');
+        }
+
+        [$rows, $totalCsvRows] = $head;
+
         $fileRows = FileRow::where('file_upload_id', $file->id)
             ->orderBy('row_number')
-            ->get();
+            ->paginate(25);
 
         $logs = FileRowLog::where('file_upload_id', $file->id)
             ->orderBy('created_at')
             ->orderBy('id')
             ->get();
 
-        [$rows, $totalRows] = $this->readCsvHead($file->filepath, 50);
-
         return view('file_rows.index', [
             'file' => $file,
             'fileRows' => $fileRows,
             'rows' => $rows,
-            'totalRows' => $totalRows,
+            'totalCsvRows' => $totalCsvRows,
+            'totalFileRows' => $fileRows->total(),
+            'fileRowHeaderCount' => FileRow::where('file_upload_id', $file->id)
+                ->where('is_header', true)
+                ->count(),
             'logsByUuid' => $logs->isEmpty() ? [] : $logs->groupBy('uuid'),
         ]);
     }
@@ -50,6 +62,12 @@ class FileRowController extends Controller
 
         if ($file instanceof RedirectResponse) {
             return $file;
+        }
+
+        if ($file->is_parsed) {
+            return redirect()
+                ->route('file_rows.index', $file->id)
+                ->with('error', 'This file has already been parsed.');
         }
 
         $validated = $request->validate([
@@ -172,25 +190,25 @@ class FileRowController extends Controller
         ]);
 
         return redirect()
-            ->route('files.show', $file->id)
+            ->route('file_rows.index', $file->id)
             ->with('status', 'File parsed successfully.');
     }
 
     /**
-     * @return array{0: list<array{row_number: int, cells: list<string>}>, 1: int}
+     * @return array{0: list<array{row_number: int, cells: list<string>}>, 1: int}|null
      */
-    private function readCsvHead(string $filepath, int $limit): array
+    private function readCsvHead(string $filepath, int $limit): ?array
     {
         $disk = Storage::disk('local');
 
         if (! $disk->exists($filepath)) {
-            return [[], 0];
+            return null;
         }
 
         $handle = fopen($disk->path($filepath), 'rb');
 
         if ($handle === false) {
-            return [[], 0];
+            return null;
         }
 
         $rows = [];

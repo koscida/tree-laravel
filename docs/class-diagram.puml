@@ -1,0 +1,206 @@
+@startuml
+title Tree Laravel - Domain model class diagram
+
+' Sources: app/Models/*.php, database/migrations/*.php, PLAN.md section 3 (Data model draft)
+' Legend:
+'   implemented = built today (model + migration exist)
+'   planned     = drafted in PLAN.md section 3, not implemented yet
+' BirthRecord shows key fields only; the full 50+ column list is in PLAN.md section 3.
+' Auth/User is a Laravel default and is out of scope for this app's flows.
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+class FileUpload <<implemented>> {
+  +id : bigint
+  +filename : string
+  +filepath : string
+  +record_type : RecordType
+  +header_rows : tinyint
+  +is_parsed : boolean
+  +parsed_date : datetime
+  +created_at : timestamp
+  +updated_at : timestamp
+  +fileRows() : HasMany
+  +fileRowLogs() : HasMany
+}
+
+class FileRow <<implemented>> {
+  +id : bigint
+  +file_upload_id : bigint
+  +is_header : boolean
+  +row_number : integer
+  +data : json
+  +created_at : timestamp
+  +updated_at : timestamp
+  +fileUpload() : BelongsTo
+}
+
+class FileRowLog <<implemented>> {
+  +id : bigint
+  +uuid : string
+  +file_upload_id : bigint
+  +status : ParseStatus
+  +message : text
+  +created_at : timestamp
+  +updated_at : timestamp
+  +fileUpload() : BelongsTo
+}
+
+class User <<implemented>> {
+  +id : bigint
+  +name : string
+  +email : string
+  +password : string
+  +email_verified_at : datetime
+}
+
+class FileMapping <<planned>> {
+  +id : bigint
+  +file_upload_id : bigint
+  +column_mapping : json
+  +created_at : timestamp
+  +updated_at : timestamp
+}
+
+class BirthRecord <<planned>> {
+  +id : bigint
+  +file_upload_id : bigint
+  +file_row_id : bigint
+  +record_no : string
+  +birth_date : string
+  +birth_date_string : string
+  +child_first_name : string
+  +child_last_name : string
+  +parents : text
+  +godparents : text
+  +priest_first_name : string
+  +deleted_at : datetime
+}
+
+class MarriageRecord <<planned>> {
+  +id : bigint
+  +file_upload_id : bigint
+  +file_row_id : bigint
+  +record_no : string
+  +deleted_at : datetime
+}
+
+class DeathRecord <<planned>> {
+  +id : bigint
+  +file_upload_id : bigint
+  +file_row_id : bigint
+  +record_no : string
+  +deleted_at : datetime
+}
+
+class Person <<planned>> {
+  +id : bigint
+  +first_name : string
+  +last_name : string
+  +birth_date : date
+  +death_date : date
+  +canonical_person_id : bigint
+  +deleted_at : datetime
+  +personRecords() : HasMany
+  +surnames() : BelongsToMany
+}
+
+class PersonRecord <<planned>> {
+  +id : bigint
+  +person_id : bigint
+  +record_type : string
+  +record_id : bigint
+  +relationship_id : bigint
+  +record() : MorphTo
+}
+
+class Relationships <<planned>> {
+  +id : bigint
+  +key : string
+  +relationship : string
+}
+
+class RecordLabels <<planned>> {
+  +id : bigint
+  +record_type : RecordType
+  +relationship_id : bigint
+  +label : string
+}
+
+class Surname <<planned>> {
+  +id : bigint
+  +surname : string
+  +canonical_surname_id : bigint
+  +deleted_at : datetime
+}
+
+class PersonSurname <<planned>> {
+  +id : bigint
+  +person_id : bigint
+  +surname_id : bigint
+}
+
+enum RecordType {
+  birth
+  marriage
+  death
+}
+
+enum ParseStatus {
+  started
+  error
+  completed
+}
+
+FileUpload "1" *-- "0..*" FileRow : fileRows
+FileRow "*" --> "1" FileUpload : fileUpload
+FileUpload "1" *-- "0..*" FileRowLog : fileRowLogs
+FileRowLog "*" --> "1" FileUpload : fileUpload
+FileUpload "1" --> "0..*" FileMapping : fileMappings
+FileUpload "1" --> "0..*" BirthRecord : birthRecords
+FileUpload "1" --> "0..*" MarriageRecord : marriageRecords
+FileUpload "1" --> "0..*" DeathRecord : deathRecords
+FileRow "1" --> "0..1" BirthRecord : parsed into
+
+Person "1" --> "0..*" PersonRecord : personRecords
+PersonRecord "*" --> "1" Person : person
+PersonRecord "*" --> "1" Relationships : relationship
+PersonRecord "*" --> "1" BirthRecord : record (polymorphic)
+PersonRecord "*" --> "1" MarriageRecord : record (polymorphic)
+PersonRecord "*" --> "1" DeathRecord : record (polymorphic)
+
+Relationships "1" --> "0..*" RecordLabels : recordLabels
+RecordLabels "*" --> "1" Relationships : relationship
+
+Person "1" --> "0..*" PersonSurname : links
+Surname "1" --> "0..*" PersonSurname : links
+Person "1" --> "0..*" Person : canonical person
+Surname "1" --> "0..*" Surname : canonical surname
+
+FileUpload ..> RecordType : record_type
+RecordLabels ..> RecordType : record_type
+FileRowLog ..> ParseStatus : status
+
+note right of FileRowLog
+  Logs sharing a uuid = one parse attempt.
+  Attempt lifecycle: started -> error | completed
+end note
+
+note right of PersonRecord
+  record_type + record_id form a morphTo link
+  to a birth / marriage / death record.
+end note
+
+note right of PersonSurname
+  Pivot table for Person.belongsToMany(Surname).
+  Unique on (person_id, surname_id).
+end note
+
+legend bottom
+  Legend
+  <b>implemented</b> : model + migration exist in the codebase today
+  <b>planned</b> : draft in PLAN.md section 3, not built yet
+  <b>*--</b> : owned child (cascadeOnDelete in the migration)
+endlegend
+@enduml

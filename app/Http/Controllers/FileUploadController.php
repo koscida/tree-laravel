@@ -56,15 +56,23 @@ class FileUploadController extends Controller
             );
         }
 
-        $fileRows = $file->fileRows()->orderBy('row_number')->get();
+        $totalCsvRows = $this->countCsvRows($file->filepath);
+
+        if ($totalCsvRows === null) {
+            return redirect()
+                ->route('files.index')
+                ->with('error', 'The CSV file could not be found.');
+        }
+
         $logs = $file->fileRowLogs()->orderBy('created_at')->orderBy('id')->get();
 
         return view('files.show', [
             'file' => $file,
-            'fileRows' => $fileRows,
             'parseAttemptCount' => $logs->pluck('uuid')->unique()->count(),
             'lastAttempt' => $logs->last(),
-            'totalCsvRows' => $this->countCsvRows($file->filepath),
+            'totalCsvRows' => $totalCsvRows,
+            'totalFileRows' => $file->fileRows()->count(),
+            'fileRowHeaderCount' => $file->fileRows()->where('is_header', true)->count(),
         ]);
     }
 

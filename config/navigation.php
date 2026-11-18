@@ -17,4 +17,5 @@
 
 return [
     ['label' => 'Files', 'route' => 'files.index', 'active' => 'files.*'],
+    ['label' => 'Settings', 'route' => 'file_settings.index', 'active' => 'file_settings.*'],
 ];

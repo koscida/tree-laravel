@@ -1,0 +1,197 @@
+%% Tree Laravel - Domain model class diagram
+%% Sources: app/Models/*.php, database/migrations/*.php, PLAN.md section 3 (Data model draft)
+%% Legend:
+%%   <<implemented>> = built today (model + migration exist)
+%%   <<planned>>     = drafted in PLAN.md section 3, not implemented yet
+%% BirthRecord shows key fields only; the full 50+ column list is in PLAN.md section 3.
+%% Auth/User is a Laravel default and is out of scope for this app's flows.
+
+classDiagram
+    direction LR
+
+    class FileUpload {
+        <<implemented>>
+        +bigint id PK
+        +string filename
+        +string filepath
+        +RecordType record_type
+        +tinyint header_rows
+        +boolean is_parsed
+        +datetime parsed_date
+        +timestamp created_at
+        +timestamp updated_at
+        +fileRows() HasMany
+        +fileRowLogs() HasMany
+    }
+
+    class FileRow {
+        <<implemented>>
+        +bigint id PK
+        +bigint file_upload_id FK
+        +boolean is_header
+        +integer row_number
+        +json data
+        +timestamp created_at
+        +timestamp updated_at
+        +fileUpload() BelongsTo
+    }
+
+    class FileRowLog {
+        <<implemented>>
+        +bigint id PK
+        +string uuid
+        +bigint file_upload_id FK
+        +ParseStatus status
+        +text message
+        +timestamp created_at
+        +timestamp updated_at
+        +fileUpload() BelongsTo
+    }
+
+    class User {
+        <<implemented>>
+        +bigint id PK
+        +string name
+        +string email
+        +string password
+        +datetime email_verified_at
+    }
+
+    class FileMapping {
+        <<planned>>
+        +bigint id PK
+        +bigint file_upload_id FK
+        +json column_mapping
+        +timestamp created_at
+        +timestamp updated_at
+    }
+
+    class BirthRecord {
+        <<planned>>
+        +bigint id PK
+        +bigint file_upload_id FK
+        +bigint file_row_id FK
+        +string record_no
+        +string birth_date
+        +string birth_date_string
+        +string child_first_name
+        +string child_last_name
+        +text parents
+        +text godparents
+        +string priest_first_name
+        +datetime deleted_at
+    }
+
+    class MarriageRecord {
+        <<planned>>
+        +bigint id PK
+        +bigint file_upload_id FK
+        +bigint file_row_id FK
+        +string record_no
+        +datetime deleted_at
+    }
+
+    class DeathRecord {
+        <<planned>>
+        +bigint id PK
+        +bigint file_upload_id FK
+        +bigint file_row_id FK
+        +string record_no
+        +datetime deleted_at
+    }
+
+    class Person {
+        <<planned>>
+        +bigint id PK
+        +string first_name
+        +string last_name
+        +date birth_date
+        +date death_date
+        +bigint canonical_person_id FK
+        +datetime deleted_at
+        +personRecords() HasMany
+        +surnames() BelongsToMany
+    }
+
+    class PersonRecord {
+        <<planned>>
+        +bigint id PK
+        +bigint person_id FK
+        +string record_type
+        +bigint record_id
+        +bigint relationship_id FK
+        +record() MorphTo
+    }
+
+    class Relationships {
+        <<planned>>
+        +bigint id PK
+        +string key
+        +string relationship
+    }
+
+    class RecordLabels {
+        <<planned>>
+        +bigint id PK
+        +RecordType record_type
+        +bigint relationship_id FK
+        +string label
+    }
+
+    class Surname {
+        <<planned>>
+        +bigint id PK
+        +string surname
+        +bigint canonical_surname_id FK
+        +datetime deleted_at
+    }
+
+    class PersonSurname {
+        <<planned>>
+        +bigint id PK
+        +bigint person_id FK
+        +bigint surname_id FK
+    }
+
+    class RecordType {
+        <<enumeration>>
+        birth
+        marriage
+        death
+    }
+
+    class ParseStatus {
+        <<enumeration>>
+        started
+        error
+        completed
+    }
+
+    FileUpload "1" --> "0..*" FileRow : fileRows
+    FileRow "*" --> "1" FileUpload : fileUpload
+    FileUpload "1" --> "0..*" FileRowLog : fileRowLogs
+    FileRowLog "*" --> "1" FileUpload : fileUpload
+    FileUpload "1" --> "0..*" FileMapping : fileMappings
+    FileUpload "1" --> "0..*" BirthRecord : birthRecords
+    FileUpload "1" --> "0..*" MarriageRecord : marriageRecords
+    FileUpload "1" --> "0..*" DeathRecord : deathRecords
+    FileRow "1" --> "0..1" BirthRecord : parsed into
+
+    Person "1" --> "0..*" PersonRecord : personRecords
+    PersonRecord "*" --> "1" Person : person
+    PersonRecord "*" --> "1" Relationships : relationship
+    PersonRecord "*" --> "1" BirthRecord : record (morphTo)
+    PersonRecord "*" --> "1" MarriageRecord : record (morphTo)
+    PersonRecord "*" --> "1" DeathRecord : record (morphTo)
+
+    Relationships "1" --> "0..*" RecordLabels : recordLabels
+    RecordLabels "*" --> "1" Relationships : relationship
+
+    Person "1" --> "0..*" PersonSurname : links
+    Surname "1" --> "0..*" PersonSurname : links
+    Person "1" --> "0..*" Person : canonical person
+    Surname "1" --> "0..*" Surname : canonical surname
+
+    FileUpload ..> RecordType : record_type
+    RecordLabels ..> RecordType : record_type
+    FileRowLog ..> ParseStatus : status
