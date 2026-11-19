@@ -15,7 +15,7 @@
                         <tr>
                             <th scope="col">Key</th>
                             <th scope="col">Label</th>
-							<th scope="col">Is Multiple People</th>
+                            <th scope="col">Is Multiple People</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -23,13 +23,13 @@
                             <tr>
                                 <td>{{ $relationship->key }}</td>
                                 <td>{{ $relationship->label }}</td>
-								<td>
-									@if($relationship->is_multiple_people)
-										<span class="badge text-bg-info">Yes</span>
-									@else
-										<span class="badge text-bg-secondary">No</span>
-									@endif
-								</td>
+                                <td>
+                                    @if($relationship->is_multiple_people)
+                                        <span class="badge text-bg-info">Yes</span>
+                                    @else
+                                        <span class="badge text-bg-secondary">No</span>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>
