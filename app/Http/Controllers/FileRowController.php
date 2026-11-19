@@ -18,10 +18,10 @@ class FileRowController extends Controller
 {
     public function index(string $fileUploadId): View|RedirectResponse
     {
-        $file = $this->findFile($fileUploadId);
+        $file = FileUpload::findValid($fileUploadId);
 
-        if ($file instanceof RedirectResponse) {
-            return $file;
+        if (is_string($file)) {
+            return redirect()->route('files.index')->with('error', $file);
         }
 
         $head = $this->readCsvHead($file->filepath, 50);
@@ -58,10 +58,10 @@ class FileRowController extends Controller
 
     public function store(Request $request, string $fileUploadId): RedirectResponse
     {
-        $file = $this->findFile($fileUploadId);
+        $file = FileUpload::findValid($fileUploadId);
 
-        if ($file instanceof RedirectResponse) {
-            return $file;
+        if (is_string($file)) {
+            return redirect()->route('files.index')->with('error', $file);
         }
 
         if ($file->is_parsed) {
@@ -230,55 +230,5 @@ class FileRowController extends Controller
         }
 
         return [$rows, $count];
-    }
-
-    private function findFile(string $fileUploadId): FileUpload|RedirectResponse
-    {
-        if (! is_numeric($fileUploadId)) {
-            return $this->fileError('The file upload id must be numeric.');
-        }
-
-        if (! $this->isValidId($fileUploadId)) {
-            return $this->fileError('The file upload id format must be valid.');
-        }
-
-        $file = FileUpload::find((int) $fileUploadId);
-
-        if ($file === null) {
-            return $this->fileError(
-                "The file upload id {$fileUploadId} did not match an existing file upload."
-            );
-        }
-
-        return $file;
-    }
-
-    private function fileError(string $message): RedirectResponse
-    {
-        return redirect()->route('files.index')->with('error', $message);
-    }
-
-    /**
-     * Ids are plain positive integers that fit a signed 64-bit primary key.
-     */
-    private function isValidId(string $value): bool
-    {
-        if (preg_match('/^[0-9]+$/', $value) !== 1) {
-            return false;
-        }
-
-        $digits = ltrim($value, '0');
-
-        if ($digits === '') {
-            return true;
-        }
-
-        $max = (string) PHP_INT_MAX;
-
-        if (strlen($digits) !== strlen($max)) {
-            return strlen($digits) < strlen($max);
-        }
-
-        return strcmp($digits, $max) <= 0;
     }
 }

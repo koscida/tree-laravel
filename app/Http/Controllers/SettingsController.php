@@ -7,6 +7,7 @@ use App\Models\Milestone;
 use App\Models\NamePart;
 use App\Models\RecordLabel;
 use App\Models\Relationship;
+use App\Models\SourcePart;
 use Illuminate\View\View;
 
 class SettingsController extends Controller
@@ -18,6 +19,7 @@ class SettingsController extends Controller
             'nameParts' => NamePart::orderBy('id')->get(),
             'milestones' => Milestone::orderBy('id')->get(),
             'dateParts' => DatePart::orderBy('id')->get(),
+            'sourceParts' => SourcePart::orderBy('id')->get(),
             'recordLabels' => RecordLabel::orderBy('id')->get(),
         ]);
     }

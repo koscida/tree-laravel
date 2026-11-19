@@ -123,6 +123,33 @@
         </section>
 
         <section class="mb-5">
+            <h2 class="h4">Source Parts</h2>
+
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Key</th>
+                            <th scope="col">Label</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($sourceParts as $sourcePart)
+                            <tr>
+                                <td>{{ $sourcePart->key }}</td>
+                                <td>{{ $sourcePart->label }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="2" class="text-secondary">Data has not been added yet.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="mb-5">
             <h2 class="h4">Record Labels</h2>
 
             <div class="table-responsive">

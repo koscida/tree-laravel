@@ -99,6 +99,22 @@ class LookupDataSeeder extends Seeder
     ];
 
     /**
+     * @var array<string, string>
+     */
+    private const SOURCE_PARTS = [
+        'record_type' => 'Record Type',
+        'record_name' => 'Record Name',
+        'provided_by' => 'Provided By',
+        'source_file' => 'Source File',
+        'source_file_accessed' => 'Source File Accessed',
+        'site_name' => 'Site Name',
+        'site_url' => 'Site URL',
+        'site_url_accessed' => 'Site URL Accessed',
+        'suggested_citation' => 'Suggested Citation',
+        'markup_citation' => 'Markup Citation',
+    ];
+
+    /**
      * @var array<string, array{label: string, data_format: string}>
      */
     private const RECORD_LABELS = [
@@ -107,6 +123,7 @@ class LookupDataSeeder extends Seeder
         'godparents_1_is_married' => ['label' => 'Godparents 1 is Married', 'data_format' => 'boolean'],
         'godmother_2_is_child' => ['label' => 'Godmother 2 is Child', 'data_format' => 'boolean'],
         'godparents_2_is_married' => ['label' => 'Godparents 2 is Married', 'data_format' => 'boolean'],
+        'line_no' => ['label' => 'Line No', 'data_format' => 'number_string'],
     ];
 
     public function run(): void
@@ -115,6 +132,7 @@ class LookupDataSeeder extends Seeder
         $this->upsert('name_parts', $this->keyLabelRows(self::NAME_PARTS), ['label']);
         $this->upsert('milestones', $this->keyLabelRows(self::MILESTONES), ['label']);
         $this->upsert('date_parts', $this->keyLabelRows(self::DATE_PARTS), ['label']);
+        $this->upsert('source_parts', $this->keyLabelRows(self::SOURCE_PARTS), ['label']);
         $this->upsert('record_labels', $this->recordLabelRows(), ['label', 'data_format']);
     }
 

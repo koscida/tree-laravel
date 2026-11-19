@@ -78,7 +78,19 @@
 
         <section class="mb-4">
             <h2 class="h4">File Mappings</h2>
-            <p class="text-secondary fst-italic mb-0">Added in a later phase.</p>
+
+            <p class="mb-3">File has been column mapped: <strong>{{ $file->is_mapped ? 'Yes' : 'No' }}</strong></p>
+
+            @if ($file->is_mapped)
+                <p class="mb-3">Date Mapped: <strong>{{ $file->mapped_date?->format('d-M-Y H:i') }}</strong></p>
+            @endif
+
+            @if ($fileMappings->isNotEmpty())
+                <p class="mb-3">Mappings: <strong>{{ $fileMappings->count() }}</strong></p>
+            @endif
+
+            <a class="btn btn-sm {{ $file->is_mapped ? 'btn-outline-primary' : 'btn-primary' }}"
+               href="{{ route('file_mappings.index', $file) }}">Open Mappings</a>
         </section>
     </div>
 @endsection

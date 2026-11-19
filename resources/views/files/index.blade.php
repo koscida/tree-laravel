@@ -61,6 +61,8 @@
                             <th scope="col">Filename</th>
                             <th scope="col">Type</th>
                             <th scope="col">Path</th>
+							<th scope="col">Is parsed</th>
+							<th scope="col">Is mapped</th>
                             <th scope="col">Created</th>
                             <th scope="col">Updated</th>
                             <th scope="col"></th>
@@ -72,6 +74,8 @@
                                 <td>{{ $file->filename }}</td>
                                 <td>{{ ucfirst($file->record_type) }}</td>
                                 <td><code>{{ $file->filepath }}</code></td>
+								<td>{{ $file->is_parsed ? "Yes" : "No" }}</td>
+								<td>{{ $file->is_mapped ? "Yes" : "No" }}</td>
                                 <td>{{ $file->created_at?->format('d M Y') }}</td>
                                 <td>{{ $file->updated_at?->format('d M Y') }}</td>
                                 <td class="text-end">
