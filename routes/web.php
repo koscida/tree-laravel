@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FileImportController;
 use App\Http\Controllers\FileMappingController;
 use App\Http\Controllers\FileRowController;
 use App\Http\Controllers\FileUploadController;
@@ -16,5 +17,8 @@ Route::get('/files/{fileUploadId}/file_rows', [FileRowController::class, 'index'
 Route::post('/files/{fileUploadId}/file_rows', [FileRowController::class, 'store'])->name('file_rows.store');
 Route::get('/files/{fileUploadId}/file_mappings', [FileMappingController::class, 'index'])->name('file_mappings.index');
 Route::post('/files/{fileUploadId}/file_mappings', [FileMappingController::class, 'store'])->name('file_mappings.store');
+
+Route::get('/file_imports', [FileImportController::class, 'index'])->name('file_imports.index');
+Route::get('/file_imports/{fileUploadId}', [FileImportController::class, 'show'])->name('file_imports.show');
 
 Route::get('/file_settings', [SettingsController::class, 'index'])->name('file_settings.index');

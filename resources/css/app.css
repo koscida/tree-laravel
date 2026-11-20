@@ -1,3 +1,10 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
 
 /* Project styles go here — they load after Bootstrap, so they win over defaults. */
+
+.btn-tiny {
+    --bs-btn-padding-y: 0.1rem;      /* .btn-sm: 0.25rem; */
+    --bs-btn-padding-x: 0.3rem;      /* .btn-sm: 0.5rem; */
+    --bs-btn-font-size: 0.65rem;     /* .btn-sm: 0.875rem; */
+    --bs-border-radius-sm: 0.25rem;  /* .btn-sm: 0.25rem; */
+}

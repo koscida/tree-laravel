@@ -16,6 +16,7 @@
 */
 
 return [
+    ['label' => 'Imports', 'route' => 'file_imports.index', 'active' => 'file_imports.*'],
     ['label' => 'Files', 'route' => 'files.index', 'active' => 'files.*'],
     ['label' => 'Settings', 'route' => 'file_settings.index', 'active' => 'file_settings.*'],
 ];
