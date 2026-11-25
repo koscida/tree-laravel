@@ -13,6 +13,7 @@
                 <table class="table table-striped align-middle mb-0">
                     <thead>
                         <tr>
+                            <th scope="col">ID</th>
                             <th scope="col">Key</th>
                             <th scope="col">Label</th>
                             <th scope="col">Is Multiple People</th>
@@ -21,6 +22,7 @@
                     <tbody>
                         @forelse ($relationships as $relationship)
                             <tr>
+                                <td>{{ $relationship->id }}</td>
                                 <td>{{ $relationship->key }}</td>
                                 <td>{{ $relationship->label }}</td>
                                 <td>
@@ -48,6 +50,7 @@
                 <table class="table table-striped align-middle mb-0">
                     <thead>
                         <tr>
+                            <th scope="col">ID</th>
                             <th scope="col">Key</th>
                             <th scope="col">Label</th>
                         </tr>
@@ -55,6 +58,7 @@
                     <tbody>
                         @forelse ($nameParts as $namePart)
                             <tr>
+                                <td>{{ $namePart->id }}</td>
                                 <td>{{ $namePart->key }}</td>
                                 <td>{{ $namePart->label }}</td>
                             </tr>
@@ -75,6 +79,7 @@
                 <table class="table table-striped align-middle mb-0">
                     <thead>
                         <tr>
+                            <th scope="col">ID</th>
                             <th scope="col">Key</th>
                             <th scope="col">Label</th>
                         </tr>
@@ -82,6 +87,7 @@
                     <tbody>
                         @forelse ($milestones as $milestone)
                             <tr>
+                                <td>{{ $milestone->id }}</td>
                                 <td>{{ $milestone->key }}</td>
                                 <td>{{ $milestone->label }}</td>
                             </tr>
@@ -102,6 +108,7 @@
                 <table class="table table-striped align-middle mb-0">
                     <thead>
                         <tr>
+                            <th scope="col">ID</th>
                             <th scope="col">Key</th>
                             <th scope="col">Label</th>
                         </tr>
@@ -109,35 +116,9 @@
                     <tbody>
                         @forelse ($dateParts as $datePart)
                             <tr>
+                                <td>{{ $datePart->id }}</td>
                                 <td>{{ $datePart->key }}</td>
                                 <td>{{ $datePart->label }}</td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="2" class="text-secondary">Data has not been added yet.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <section class="mb-5">
-            <h2 class="h4">Source Parts</h2>
-
-            <div class="table-responsive">
-                <table class="table table-striped align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th scope="col">Key</th>
-                            <th scope="col">Label</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($sourceParts as $sourcePart)
-                            <tr>
-                                <td>{{ $sourcePart->key }}</td>
-                                <td>{{ $sourcePart->label }}</td>
                             </tr>
                         @empty
                             <tr>
@@ -156,6 +137,7 @@
                 <table class="table table-striped align-middle mb-0">
                     <thead>
                         <tr>
+                            <th scope="col">ID</th>
                             <th scope="col">Key</th>
                             <th scope="col">Label</th>
                             <th scope="col">Data Format</th>
@@ -164,6 +146,7 @@
                     <tbody>
                         @forelse ($recordLabels as $recordLabel)
                             <tr>
+                                <td>{{ $recordLabel->id }}</td>
                                 <td>{{ $recordLabel->key }}</td>
                                 <td>{{ $recordLabel->label }}</td>
                                 <td>{{ $recordLabel->data_format }}</td>
@@ -177,5 +160,35 @@
                 </table>
             </div>
         </section>
+
+        <section class="mb-5">
+            <h2 class="h4">Source Parts</h2>
+
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Key</th>
+                            <th scope="col">Label</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($sourceParts as $sourcePart)
+                            <tr>
+                                <td>{{ $sourcePart->id }}</td>
+                                <td>{{ $sourcePart->key }}</td>
+                                <td>{{ $sourcePart->label }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="2" class="text-secondary">Data has not been added yet.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
     </div>
 @endsection
