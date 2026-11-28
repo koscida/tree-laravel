@@ -4,7 +4,6 @@
 
 @section('content')
     @php
-        $mappingsByColumn = $fileMappings->keyBy('column_idx');
         $mapKindColors = [
             'relationship' => '#fee',
             'milestone_date' => '#eef',
@@ -73,7 +72,27 @@
             ],
         ];
 
-        function standardizeMapping($mapping) {
+        $sortUrl = function ($column) use ($file, $sortBy, $sortDirection) {
+            $nextDirection = $column === $sortBy && $sortDirection === 'asc' ? 'desc' : 'asc';
+
+            return route('file_imports.show', [
+                'fileUploadId' => $file->id,
+                'sort' => $column,
+                'direction' => $nextDirection,
+            ]);
+        };
+
+        $sortIndicator = function ($column) use ($sortBy, $sortDirection) {
+            if ($column !== $sortBy) {
+                return '';
+            }
+
+            return $sortDirection === 'asc'
+                ? ' <span aria-hidden="true">↑</span>'
+                : ' <span aria-hidden="true">↓</span>';
+        };
+
+        $standardizeMapping = function ($mapping) {
             return [
                 'map_kind' => is_object($mapping)
                     ? ($mapping->map_kind ?? '')
@@ -97,9 +116,10 @@
                     ? ($mapping->record_label_id ?? '')
                     : ($mapping['record_label_id'] ?? ''),
             ];
-        }
+        };
 
-        $displayMappingKeys = function ($mapping) use (
+        $displayMappingLabels = function ($mapping) use (
+            $standardizeMapping,
             $relationships,
             $nameParts,
             $milestones,
@@ -107,7 +127,8 @@
             $sourceParts,
             $recordLabels
         ) {
-            $mapping = standardizeMapping($mapping);
+            $mapping = $standardizeMapping($mapping);
+
             return implode(
                 '<br/>',
                 array_filter([
@@ -133,8 +154,8 @@
             );
         };
 
-        $displayCellData = function ($idx, $mapping) {
-            $mapping = standardizeMapping($mapping);
+        $displayCellData = function ($idx, $mapping) use ($standardizeMapping) {
+            $mapping = $standardizeMapping($mapping);
 
             return 'data-column-idx="' . ($idx) . '"' .
                 'data-map-kind="' . ($mapping['map_kind'] ?? null) . '"' .
@@ -147,7 +168,16 @@
         };
     @endphp
 
-    <div class="container py-5">
+    <div class="container py-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ route('file_imports.index') }}">File Imports</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">{{ $file->filename }}</li>
+            </ol>
+        </nav>
+
         <h1 class="h3 mb-4">{{ $file->filename }}</h1>
 
         <div class="row g-3 mb-3" id="file-import-filters">
@@ -183,14 +213,15 @@
             @endforeach
         </div>
 
-        <div class="w-100 d-flex gap-2">
-            <div id="file-import-scroll-left" class="flex-grow-1" style="height: 500px; min-width: 0; overflow: auto;">
+        <div class="w-100 d-flex bg-white">
+            <div id="file-import-scroll-left" class="flex-grow-1" style="height: 500px; min-width: 0; overflow: auto; scrollbar-width: none;">
                 <table class="table table-sm table-striped align-middle file-import-table" id="file-import-table">
                     <thead style="position: sticky; top: 0; z-index: 3;">
                         <tr>
-                            <th scope="col" class="bg-white" style="position: sticky; left: 0; z-index: 2;">
+                            <th scope="col" class="bg-white" style="position: sticky; left: 0; z-index: 2;"
+                                aria-sort="{{ $sortBy === 'row_number' ? ($sortDirection === 'asc' ? 'ascending' : 'descending') : 'none' }}">
                                 <div style="height: 80px; width: 80px; overflow: none;">
-                                    <span>CSV Row</span>
+                                    <a href="{{ $sortUrl('row_number') }}" class="text-decoration-none" title="Sort by CSV row">CSV Row{!! $sortIndicator('row_number') !!}</a>
                                     <p style="font-weight: normal; font-size: 0.8rem; line-height: 1.15rem">
                                         Map Kind<br/>
                                         Mapping 1<br/>
@@ -198,17 +229,18 @@
                                     </p>
                                 </div>
                             </th>
-                            @foreach ($column_idxs as $column_idx)
-                                @php($mapping = $mappingsByColumn[$column_idx])
+                            @foreach ($columnIdxs as $columnIdx)
+                                @php($mapping = $mappingsByColumnIdx[$columnIdx])
                                 <th scope="col" class="bg-white" style="position: relative; z-index: 1;"
-                                    {!! $displayCellData($column_idx, $mapping) !!} >
+                                    aria-sort="{{ $sortBy === (string) $columnIdx ? ($sortDirection === 'asc' ? 'ascending' : 'descending') : 'none' }}"
+                                    {!! $displayCellData($columnIdx, $mapping) !!} >
                                     <div style="height: 80px; overflow: none;">
-                                        <span>Column {{ $column_idx }}</span>
+                                        <a href="{{ $sortUrl((string) $columnIdx) }}" class="text-decoration-none" title="Sort by column {{ $columnIdx }}">Column {{ $columnIdx }}{!! $sortIndicator((string) $columnIdx) !!}</a>
                                         <br/>
                                         <p style="font-weight: normal; font-size: 0.8rem; line-height: 1.15rem">
                                             {{ $mapping->map_kind }}
                                             <br/>
-                                            {!! $displayMappingKeys($mapping) !!}
+                                            {!! $displayMappingLabels($mapping) !!}
                                         </p>
                                     </div>
                                 </th>
@@ -219,12 +251,12 @@
                                 <th scope="col" class="bg-white" style="position: sticky; left: 0; z-index: 2;">
                                     <div style="height: 30px; overflow: scroll;">{{ $headerRow->row_number }}</div>
                                 </th>
-                                @foreach ($column_idxs as $column_idx)
-                                    @php($mapping = $mappingsByColumn[$column_idx])
-                                    @if (isset($headerRow->data[$column_idx]))
+                                @foreach ($columnIdxs as $columnIdx)
+                                    @php($mapping = $mappingsByColumnIdx[$columnIdx])
+                                    @if (isset($headerRow->data[$columnIdx]))
                                         <th scope="col" class="bg-white" style="position: relative; z-index: 1;"
-                                            {!! $displayCellData($column_idx, $mapping) !!} >
-                                            <div style="height: 30px; overflow: scroll;">{{ $headerRow->data[$column_idx] }}</div>
+                                            {!! $displayCellData($columnIdx, $mapping) !!} >
+                                            <div style="height: 30px; overflow: scroll;">{{ $headerRow->data[$columnIdx] }}</div>
                                         </th>
                                     @endif
                                 @endforeach
@@ -233,17 +265,18 @@
                     </thead>
 
                     <tbody class="table-group-divider">
-                        @foreach ($fileRows as $fileRow)
+                        @foreach ($rowNumbers as $rowNumber)
+                            @php($fileRow = $fileRowsByRowNumber[$rowNumber])
                             <tr>
                                 <th scope="row" style="position: sticky; left: 0; z-index: 1;">
                                     <div style="height: 30px; overflow: scroll;">{{ $fileRow->row_number }}</div>
                                 </th>
-                                @foreach ($column_idxs as $column_idx)
-                                    @php($mapping = $mappingsByColumn[$column_idx])
-                                    @if (isset($fileRow->data[$column_idx]))
-                                        <td {!! $displayCellData($column_idx, $mapping) !!}
+                                @foreach ($columnIdxs as $columnIdx)
+                                    @php($mapping = $mappingsByColumnIdx[$columnIdx])
+                                    @if (isset($fileRow->data[$columnIdx]))
+                                        <td {!! $displayCellData($columnIdx, $mapping) !!}
                                             style="background-color: {{ $mapKindColors[$mapping->map_kind] }}; width: {{ $mapKindWidths[$mapping->map_kind] }};">
-                                            <div style="height: 30px; overflow: scroll;">{{ \Illuminate\Support\Str::limit($fileRow->data[$column_idx], 60) }}</div>
+                                            <div style="height: 30px; overflow: scroll;">{{ \Illuminate\Support\Str::limit($fileRow->data[$columnIdx], 60) }}</div>
                                         </td>
                                     @endif
                                 @endforeach
@@ -253,7 +286,7 @@
                 </table>
             </div>
 
-            <div id="file-import-scroll-right" style="height: 500px; width: 200px; flex: 0 0 200px; overflow: auto;">
+            <div id="file-import-scroll-right" style="height: 500px; width: 200px; flex: 0 0 200px; overflow: auto; border-left: 2px solid #444;">
                 <table class="table table-sm table-striped align-middle file-import-table">
                     <thead style="position: sticky; top: 0; z-index: 3;">
                         <tr>
@@ -266,7 +299,7 @@
                                         <p style="font-weight: normal; font-size: 0.8rem; line-height: 1.15rem">
                                             {{ $linkColumn['map_kind'] ?? '' }}
                                             <br/>
-                                            {!! $displayMappingKeys($linkColumn) !!}
+                                            {!! $displayMappingLabels($linkColumn) !!}
                                         </p>
                                     </div>
                                 </th>

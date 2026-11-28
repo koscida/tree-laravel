@@ -35,6 +35,9 @@ AGENTS.md
 agents.md
 CLAUDE.md
 claude.md
+.claude/*
+.github/*
+.mcp.json
 
 # Tests are local only: fixtures may contain real family data
 /tests

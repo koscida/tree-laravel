@@ -3,7 +3,7 @@
 @section('title', e($file->filename))
 
 @section('content')
-    <div class="container py-5">
+    <div class="container py-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item">
