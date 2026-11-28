@@ -21,6 +21,7 @@ Route::post('/files/{fileUploadId}/file_mappings', [FileMappingController::class
 Route::get('/file_imports', [FileImportController::class, 'index'])->name('file_imports.index');
 Route::get('/file_imports/{fileUploadId}', [FileImportController::class, 'show'])->name('file_imports.show');
 Route::get('/file_imports/{fileUploadId}/surnames', [FileImportController::class, 'surnames'])->name('file_imports.surnames');
+Route::post('/file_imports/{fileUploadId}/surnames', [FileImportController::class, 'surnameStore'])->name('file_imports.surname_store');
 Route::get('/file_imports/{fileUploadId}/families', [FileImportController::class, 'families'])->name('file_imports.families');
 
 Route::get('/file_settings', [SettingsController::class, 'index'])->name('file_settings.index');
